@@ -134,11 +134,11 @@ static ERL_NIF_TERM get_handle(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv
     // Initialize libusb.
     r = libusb_init(NULL);
     if (r < 0)
-        return enif_make_tuple2(env, priv->atom_error, priv->atom_libusb_init_fail);
+        return enif_make_tuple2(env, priv->atom_error,  get_libusb_error(env, r));
 
     int cnt = libusb_get_device_list(NULL, &devs);
     if (cnt < 0)
-        return enif_make_tuple2(env, priv->atom_error, priv->atom_libusb_dev_list_fail);
+        return enif_make_tuple2(env, priv->atom_error,  get_libusb_error(env, r));
 
     while ((dev = devs[i++]) != NULL) {
         r = libusb_get_device_descriptor(dev, &desc);
@@ -148,10 +148,10 @@ static ERL_NIF_TERM get_handle(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv
             break;
         }
 
-        e = libusb_open(dev,&handle);
+        e = libusb_open(dev, &handle);
         if (e < 0)
         {
-            enif_fprintf(stderr, "Error opening device.\r\n");
+            enif_fprintf(stderr, "Error opening device. %d\r\n", e);
             break;
         }
 
@@ -162,10 +162,10 @@ static ERL_NIF_TERM get_handle(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv
     }
 
     if (found == 0) {
-        enif_fprintf(stderr, "Could not find device.\r\n");
+        enif_fprintf(stderr, "Could not open device.\r\n");
         libusb_free_device_list(devs, 1);
         libusb_close(handle);
-        return enif_make_tuple2(env, priv->atom_error, priv->atom_device_not_found);
+        return enif_make_tuple2(env, priv->atom_error, get_libusb_error(env, e));
     }
 
     dev_expected = dev;
@@ -174,14 +174,12 @@ static ERL_NIF_TERM get_handle(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv
     if(libusb_kernel_driver_active(handle, 0) == 1)
     {
         enif_fprintf(stderr, "Kernel Driver Active, trying to detach.\r\n");
-        if(libusb_detach_kernel_driver(handle, 0) == 0)
-            enif_fprintf(stderr, "Kernel Driver Detached!\r\n");
-        else
-        {
+        e = libusb_detach_kernel_driver(handle, 0);
+        if(e != 0) {
             enif_fprintf(stderr, "Couldn't detach kernel driver!\r\n");
             libusb_free_device_list(devs, 1);
             libusb_close(handle);
-            return enif_make_tuple2(env, priv->atom_error, priv->atom_kernel_driver_detach_fail);
+            return enif_make_tuple2(env, priv->atom_error, get_libusb_error(env, e));
         }
     }
 
@@ -191,7 +189,7 @@ static ERL_NIF_TERM get_handle(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv
         enif_fprintf(stderr, "Cannot Claim Interface\r\n");
         libusb_free_device_list(devs, 1);
         libusb_close(handle);
-        return enif_make_tuple2(env, priv->atom_error, priv->atom_claim_interface_fail);
+        return enif_make_tuple2(env, priv->atom_error, get_libusb_error(env, e));
     }
 
     resource_data = enif_alloc_resource(libusb_rt, sizeof(ResourceData));
@@ -254,21 +252,7 @@ static ERL_NIF_TERM ctrl_send(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[
 
     acc = libusb_control_transfer(resource_data->handle, bmRequestType, bRequest, wValue, wIndex, bin.data, bin.size, timeout);
     if (acc < 0) {
-        switch(acc) {
-        case LIBUSB_ERROR_TIMEOUT:
-            return enif_make_tuple2(env, priv->atom_error, enif_make_atom(env, "timeout"));
-            break;
-        case LIBUSB_ERROR_PIPE:
-            return enif_make_tuple2(env, priv->atom_error, enif_make_atom(env, "pipe"));
-            break;
-        case LIBUSB_ERROR_NO_DEVICE:
-            return enif_make_tuple2(env, priv->atom_error, enif_make_atom(env, "enoent"));
-            break;
-        default:
-            enif_fprintf(stderr, "Unknown error: %d\r\n", acc);
-            return enif_make_tuple2(env, priv->atom_error, enif_make_int(env, acc));
-            break;
-        }
+        return get_libusb_error(env, acc);
     } else {
         return enif_make_tuple2(env, priv->atom_ok, enif_make_int(env, acc));
     }
@@ -319,4 +303,9 @@ static void unload(ErlNifEnv* env, void* priv)
 static int map_put(ErlNifEnv *env, ERL_NIF_TERM map_in, ERL_NIF_TERM* map_out, ERL_NIF_TERM key, ERL_NIF_TERM value)
 {
     return enif_make_map_put(env, map_in, key, value, map_out);
+}
+
+static ERL_NIF_TERM get_libusb_error(ErlNifEnv *env, int error) {
+    const char * error_str = libusb_error_name(error);
+    return enif_make_atom(env, error_str);
 }
