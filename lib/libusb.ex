@@ -1,6 +1,8 @@
 defmodule LibUsb do
   require Logger
 
+  @nif_not_loaded_err "nif not loaded"
+
   @on_load :load_nif
   @doc false
   def load_nif do
@@ -13,5 +15,8 @@ defmodule LibUsb do
     end
   end
 
-  def list_devices, do: :erlang.nif_error("nif not loaded")
+  def list_devices, do: :erlang.nif_error(@nif_not_loaded_err)
+  def get_handle(_id_vendor, _id_product), do: :erlang.nif_error(@nif_not_loaded_err)
+  def release_handle(_handle), do: :erlang.nif_error(@nif_not_loaded_err)
+
 end

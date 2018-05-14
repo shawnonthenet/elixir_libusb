@@ -9,8 +9,8 @@ defmodule LibUsb.MixProject do
       compilers: [:elixir_make] ++ Mix.compilers(),
       make_clean: ["clean"],
       make_env: make_env(),
-      # package: package(),
-      # description: description(),
+      package: package(),
+      description: description(),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       aliases: [format: [&format_c/1, "format"]]
@@ -58,4 +58,22 @@ defmodule LibUsb.MixProject do
   end
 
   defp format_c(_args), do: true
+
+  defp package do
+    [
+      licenses: ["MIT", "GPL"],
+      maintainers: ["konnorrigby@gmail.com"],
+      links: %{
+        "GitHub" => "https://github.com/connorrigby/libusb"
+      },
+      files: ["lib", "mix.exs", "README*", "LICENSE*", "c_src", "Makefile"],
+      source_url: "https://github.com/connorrigby/libusb"
+    ]
+  end
+
+  defp description do
+    """
+    Simple Elixir LibUSB Wrapper.
+    """
+  end
 end
