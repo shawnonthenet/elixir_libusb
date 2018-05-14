@@ -28,12 +28,12 @@ LIBUSB_DL_URL := "https://iweb.dl.sourceforge.net/project/libusb/libusb-1.0/libu
 
 .PHONY: all clean libusb-clean dir-clean
 
-all: $(PRIV_DIR) $(LIBUSB_NIF) $(LIBUSB_SRC_DIR)
+all: $(PRIV_DIR) $(LIBUSB_SRC_DIR) $(LIBUSB_NIF)
 
 $(LIBUSB_SRC_DIR):
 	wget $(LIBUSB_DL_URL)
 	tar xf $(LIBUSB_DL)
-	mv $(LIBUSB_DL) $(LIBUSB_SRC_DIR)
+	mv libusb-$(LIBUSB_VERSION) $(LIBUSB_SRC_DIR)
 
 $(PRIV_DIR):
 	mkdir -p $(PRIV_DIR)
