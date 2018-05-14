@@ -1,21 +1,10 @@
 # Libusb
 
-**TODO: Add description**
+# _This is a work in progress_
 
-## Installation
+## FAQ
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `libusb` to your list of dependencies in `mix.exs`:
+### Why is the Libusb source in this project?
 
-```elixir
-def deps do
-  [
-    {:libusb, "~> 0.1.0"}
-  ]
-end
-```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/libusb](https://hexdocs.pm/libusb).
-
+Because Libusb isn't enabled in Nerves Projects by default and this seemed like
+the easiest way to increase availability.
