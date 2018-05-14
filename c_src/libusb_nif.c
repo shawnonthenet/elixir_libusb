@@ -219,6 +219,65 @@ static ERL_NIF_TERM release_handle(ErlNifEnv *env, int argc, const ERL_NIF_TERM 
     return priv->atom_ok;
 }
 
+static ERL_NIF_TERM ctrl_send(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ResourceData *resource_data;
+    PrivData* priv = enif_priv_data(env);
+    ErlNifBinary bin;
+
+    int acc;
+
+    uint8_t 	bmRequestType, bRequest;
+    uint16_t 	wValue, wIndex, wLength;
+    unsigned char * data;
+    unsigned int 	timeout;
+
+    if(!enif_get_resource(env, argv[0], libusb_rt, (void **)&resource_data)) {
+        return enif_make_badarg(env);
+    }
+
+    if(!enif_get_int(env, argv[1], &acc)) return enif_make_badarg(env);
+    bmRequestType = (uint8_t)acc;
+
+    if(!enif_get_int(env, argv[2], &acc)) return enif_make_badarg(env);
+    bRequest = (uint8_t)acc;
+
+    if(!enif_get_int(env, argv[3], &acc)) return enif_make_badarg(env);
+    wValue = (uint16_t)acc;
+
+    if(!enif_get_int(env, argv[4], &acc)) return enif_make_badarg(env);
+    wIndex = (uint16_t)acc;
+
+    if(!enif_get_int(env, argv[6], &acc)) return enif_make_badarg(env);
+    timeout = (unsigned int)acc;
+
+    if(!enif_inspect_binary(env, argv[5], &bin)) return enif_make_badarg(env);
+
+    acc = libusb_control_transfer(resource_data->handle, bmRequestType, bRequest, wValue, wIndex, bin.data, bin.size, timeout);
+    if (acc < 0) {
+        switch(acc) {
+        case LIBUSB_ERROR_TIMEOUT:
+            return enif_make_tuple2(env, priv->atom_error, enif_make_atom(env, "timeout"));
+            break;
+        case LIBUSB_ERROR_PIPE:
+            return enif_make_tuple2(env, priv->atom_error, enif_make_atom(env, "pipe"));
+            break;
+        case LIBUSB_ERROR_NO_DEVICE:
+            return enif_make_tuple2(env, priv->atom_error, enif_make_atom(env, "enoent"));
+            break;
+        default:
+            enif_fprintf(stderr, "Unknown error: %d\r\n", acc);
+            return enif_make_tuple2(env, priv->atom_error, enif_make_int(env, acc));
+            break;
+        }
+    } else {
+        return enif_make_tuple2(env, priv->atom_ok, enif_make_int(env, acc));
+    }
+}
+
+static ERL_NIF_TERM ctrl_receive(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+
+}
+
 static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM info) {
     PrivData* data = enif_alloc(sizeof(PrivData));
 

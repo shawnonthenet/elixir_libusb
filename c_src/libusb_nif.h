@@ -34,13 +34,19 @@ static ErlNifResourceType *libusb_rt;
 static int map_put(ErlNifEnv *env, ERL_NIF_TERM map_in, ERL_NIF_TERM* map_out, ERL_NIF_TERM key, ERL_NIF_TERM value);
 static ERL_NIF_TERM build_dev_list(ErlNifEnv *env, libusb_device *dev);
 static ERL_NIF_TERM list_devices(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+
 static ERL_NIF_TERM get_handle(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM release_handle(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+
+static ERL_NIF_TERM ctrl_send(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+static ERL_NIF_TERM ctrl_receive(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 
 static ErlNifFunc nif_funcs[] = {
     {"list_devices", 0, list_devices},
     {"get_handle", 2, get_handle},
-    {"release_handle", 1, release_handle}
+    {"release_handle", 1, release_handle},
+    {"ctrl_send", 7, ctrl_send},
+    {"ctrl_receive", 6, ctrl_receive}
 };
 
 ERL_NIF_INIT(Elixir.LibUsb, nif_funcs,  &load, &reload, &upgrade, &unload)

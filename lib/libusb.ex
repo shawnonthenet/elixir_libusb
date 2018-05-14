@@ -19,4 +19,10 @@ defmodule LibUsb do
   def get_handle(_id_vendor, _id_product), do: :erlang.nif_error(@nif_not_loaded_err)
   def release_handle(_handle), do: :erlang.nif_error(@nif_not_loaded_err)
 
+  @spec ctrl_send(handle :: reference, integer, integer, integer, integer, binary, integer) :: any
+  def ctrl_send(_handle, _request_type, _request, _value, _index, _data, _timeout),
+    do: :erlang.nif_error(@nif_not_loaded_err)
+
+  def ctrl_receive(_handle, _request_type, _request, _value, _index, _timeout),
+    do: :erlang.nif_error(@nif_not_loaded_err)
 end
