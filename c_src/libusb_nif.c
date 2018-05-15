@@ -69,9 +69,7 @@ static ERL_NIF_TERM build_dev_list(ErlNifEnv *env, libusb_device *dev) {
     return dev_map;
 }
 
-
-static ERL_NIF_TERM list_devices(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
-{
+static ERL_NIF_TERM list_devices(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     libusb_device **devs;
     ssize_t cnt;
     int r, i;
