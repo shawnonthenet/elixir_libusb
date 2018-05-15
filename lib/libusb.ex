@@ -23,6 +23,10 @@ defmodule LibUsb do
   def ctrl_send(_handle, _request_type, _request, _value, _index, _data, _timeout),
     do: :erlang.nif_error(@nif_not_loaded_err)
 
-  def ctrl_receive(_handle, _request_type, _request, _value, _index, _timeout),
+  def ctrl_receive(_handle, _request_type, _request, _value, _index, _length, _timeout),
     do: :erlang.nif_error(@nif_not_loaded_err)
+
+  def get_configuration(_handle), do: :erlang.nif_error(@nif_not_loaded_err)
+
+  def set_configuration(_handle, _config), do: :erlang.nif_error(@nif_not_loaded_err)
 end
