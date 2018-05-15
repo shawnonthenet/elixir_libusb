@@ -252,14 +252,90 @@ static ERL_NIF_TERM ctrl_send(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[
 
     acc = libusb_control_transfer(resource_data->handle, bmRequestType, bRequest, wValue, wIndex, bin.data, bin.size, timeout);
     if (acc < 0) {
-        return get_libusb_error(env, acc);
+        return enif_make_tuple2(env, priv->atom_error, get_libusb_error(env, acc));
     } else {
         return enif_make_tuple2(env, priv->atom_ok, enif_make_int(env, acc));
     }
 }
 
 static ERL_NIF_TERM ctrl_receive(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ResourceData *resource_data;
+    PrivData* priv = enif_priv_data(env);
+    ErlNifBinary bin;
 
+    int acc;
+
+    uint8_t 	bmRequestType, bRequest;
+    uint16_t 	wValue, wIndex, wLength;
+    unsigned char * data;
+    unsigned int 	timeout;
+
+    if(!enif_get_resource(env, argv[0], libusb_rt, (void **)&resource_data)) {
+        return enif_make_badarg(env);
+    }
+
+    if(!enif_get_int(env, argv[1], &acc)) return enif_make_badarg(env);
+    bmRequestType = (uint8_t)acc;
+
+    if(!enif_get_int(env, argv[2], &acc)) return enif_make_badarg(env);
+    bRequest = (uint8_t)acc;
+
+    if(!enif_get_int(env, argv[3], &acc)) return enif_make_badarg(env);
+    wValue = (uint16_t)acc;
+
+    if(!enif_get_int(env, argv[4], &acc)) return enif_make_badarg(env);
+    wIndex = (uint16_t)acc;
+
+    if(!enif_get_int(env, argv[5], &acc)) return enif_make_badarg(env);
+    wLength = (uint16_t)acc;
+
+    if(!enif_get_int(env, argv[6], &acc)) return enif_make_badarg(env);
+    timeout = (unsigned int)acc;
+
+
+    acc = libusb_control_transfer(resource_data->handle, bmRequestType, bRequest, wValue, wIndex, bin.data, bin.size, timeout);
+    if (acc < 0) {
+        return enif_make_tuple2(env, priv->atom_error, get_libusb_error(env, acc));
+    } else {
+        if(!enif_alloc_binary(acc, &bin))
+            return enif_make_tuple2(env, priv->atom_error, enif_make_atom(env, "alloc_failed"));
+
+        memcpy(bin.data, data, acc);
+        ERL_NIF_TERM ret = enif_make_tuple2(env, priv->atom_ok, enif_make_binary(env, &bin));
+        enif_release_binary(&bin);
+        return ret;
+    }
+}
+
+static ERL_NIF_TERM set_configuration(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ResourceData *resource_data;
+    PrivData* priv = enif_priv_data(env);
+    int config;
+
+    if(!enif_get_resource(env, argv[0], libusb_rt, (void **)&resource_data)) {
+        return enif_make_badarg(env);
+    }
+
+    if(!enif_get_int(env, argv[1], &config)) {
+        return enif_make_badarg(env);
+    }
+
+    libusb_set_configuration(resource_data->handle, config);
+    return priv->atom_ok;
+}
+
+static ERL_NIF_TERM get_configuration(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ResourceData *resource_data;
+    PrivData* priv = enif_priv_data(env);
+    int config;
+
+    if(!enif_get_resource(env, argv[0], libusb_rt, (void **)&resource_data)) {
+        return enif_make_badarg(env);
+    }
+
+    libusb_get_configuration(resource_data->handle, &config);
+
+    return enif_make_tuple2(env, priv->atom_ok, enif_make_int(env, config));
 }
 
 static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM info) {
@@ -273,11 +349,6 @@ static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM info) {
     data->atom_undefined = enif_make_atom(env, "undefined");
     data->atom_error = enif_make_atom(env, "error");
     data->atom_nil = enif_make_atom(env, "nil");
-    data->atom_libusb_init_fail = enif_make_atom(env, "libusb_init_fail");
-    data->atom_libusb_dev_list_fail = enif_make_atom(env, "libusb_get_dev_list_fail");
-    data->atom_device_not_found = enif_make_atom(env, "device_not_found");
-    data->atom_kernel_driver_detach_fail = enif_make_atom(env, "kernel_driver_detach_fail");
-    data->atom_claim_interface_fail = enif_make_atom(env, "claim_interface_fail");
     *priv = (void*) data;
 
     libusb_rt = enif_open_resource_type(env, "Elixir.LibUsb", "libusb_resource", libusb_rt_dtor, ERL_NIF_RT_CREATE, NULL);
