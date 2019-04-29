@@ -41,7 +41,7 @@ defmodule LibUsb.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:elixir_make, "~> 0.4.0", runtime: false},
+      {:elixir_make, "~> 0.5", runtime: false},
       {:dialyxir, "~> 0.5.1", only: :dev, runtime: false},
       {:ex_doc, "~> 0.18.1", only: [:dev, :test]}
     ]
