@@ -26,6 +26,13 @@ defmodule LibUsb do
   def ctrl_receive(_handle, _request_type, _request, _value, _index, _length, _timeout),
     do: :erlang.nif_error(@nif_not_loaded_err)
 
+  @spec bulk_send(handle :: reference, integer, binary, integer) :: any
+  def bulk_send(_handle, _endpoint, _data, _timeout),
+    do: :erlang.nif_error(@nif_not_loaded_err)
+
+  def bulk_receive(_handle, _endpoint, _length, _timeout),
+    do: :erlang.nif_error(@nif_not_loaded_err)
+
   def get_configuration(_handle), do: :erlang.nif_error(@nif_not_loaded_err)
 
   def set_configuration(_handle, _config), do: :erlang.nif_error(@nif_not_loaded_err)

@@ -215,6 +215,80 @@ static ERL_NIF_TERM release_handle(ErlNifEnv *env, int argc, const ERL_NIF_TERM 
     return priv->atom_ok;
 }
 
+static ERL_NIF_TERM bulk_send(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ResourceData *resource_data;
+    PrivData* priv = enif_priv_data(env);
+    ErlNifBinary bin;
+
+    int acc;
+
+    uint8_t endpoint;
+    int actual;
+    unsigned int timeout;
+
+    if(!enif_get_resource(env, argv[0], libusb_rt, (void **)&resource_data)) {
+        return enif_make_badarg(env);
+    }
+
+    if(!enif_get_int(env, argv[1], &acc)) return enif_make_badarg(env);
+    endpoint = (uint8_t)acc;
+
+    if(!enif_get_int(env, argv[3], &acc)) return enif_make_badarg(env);
+    timeout = (unsigned int)acc;
+
+    if(!enif_inspect_binary(env, argv[2], &bin)) return enif_make_badarg(env);
+
+    acc = libusb_bulk_transfer(resource_data->handle, endpoint, bin.data, bin.size, &actual, timeout);
+    if (acc < 0 || actual != bin.size) {
+        return enif_make_tuple2(env, priv->atom_error, get_libusb_error(env, acc));
+    } else {
+        return enif_make_tuple2(env, priv->atom_ok, enif_make_int(env, acc));
+    }
+}
+
+static ERL_NIF_TERM bulk_receive(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ResourceData *resource_data;
+    PrivData* priv = enif_priv_data(env);
+    ErlNifBinary bin;
+
+    int acc;
+
+    uint8_t endpoint, length;
+    unsigned char * data;
+    int actual;
+    unsigned int timeout;
+
+    if(!enif_get_resource(env, argv[0], libusb_rt, (void **)&resource_data)) {
+        return enif_make_badarg(env);
+    }
+
+    if(!enif_get_int(env, argv[1], &acc)) return enif_make_badarg(env);
+    endpoint = (uint8_t)acc;
+
+    if(!enif_get_int(env, argv[2], &acc)) return enif_make_badarg(env);
+    length = (uint8_t)acc;
+
+    if(!enif_get_int(env, argv[3], &acc)) return enif_make_badarg(env);
+    timeout = (unsigned int)acc;
+
+    data = (unsigned char *) malloc(length);
+
+    acc = libusb_bulk_transfer(resource_data->handle, endpoint | LIBUSB_ENDPOINT_IN, data, length, &actual, timeout);
+    if (acc < 0) {
+	free(data);
+        return enif_make_tuple2(env, priv->atom_error, get_libusb_error(env, acc));
+    } else {
+        if(!enif_alloc_binary(actual, &bin))
+            return enif_make_tuple2(env, priv->atom_error, enif_make_atom(env, "alloc_failed"));
+
+        memcpy(bin.data, data, actual);
+	free(data);
+        ERL_NIF_TERM ret = enif_make_tuple2(env, priv->atom_ok, enif_make_binary(env, &bin));
+        enif_release_binary(&bin);
+        return ret;
+    }
+}
+
 static ERL_NIF_TERM ctrl_send(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     ResourceData *resource_data;
     PrivData* priv = enif_priv_data(env);
