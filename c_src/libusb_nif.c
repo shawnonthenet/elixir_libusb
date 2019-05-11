@@ -253,7 +253,8 @@ static ERL_NIF_TERM bulk_receive(ErlNifEnv *env, int argc, const ERL_NIF_TERM ar
 
     int acc;
 
-    uint8_t endpoint, length;
+    uint8_t endpoint;
+    int length;
     unsigned char * data;
     int actual;
     unsigned int timeout;
@@ -266,7 +267,7 @@ static ERL_NIF_TERM bulk_receive(ErlNifEnv *env, int argc, const ERL_NIF_TERM ar
     endpoint = (uint8_t)acc;
 
     if(!enif_get_int(env, argv[2], &acc)) return enif_make_badarg(env);
-    length = (uint8_t)acc;
+    length = (int)acc;
 
     if(!enif_get_int(env, argv[3], &acc)) return enif_make_badarg(env);
     timeout = (unsigned int)acc;
