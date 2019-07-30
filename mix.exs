@@ -5,7 +5,7 @@ defmodule LibUsb.MixProject do
     [
       app: :libusb,
       version: "0.1.0",
-      elixir: "~> 1.6",
+      elixir: "~> 1.9",
       compilers: [:elixir_make] ++ Mix.compilers(),
       make_clean: ["clean"],
       make_env: make_env(),
