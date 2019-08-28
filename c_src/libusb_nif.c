@@ -102,7 +102,7 @@ static ERL_NIF_TERM list_devices(ErlNifEnv *env, int argc, const ERL_NIF_TERM ar
 static void libusb_rt_dtor(ErlNifEnv *env, void *obj)
 {
     // ResourceData *resource_data = (ResourceData *)obj;
-    enif_fprintf(stderr, "libusb_rt_dtor called\r\n");
+    // enif_fprintf(stderr, "libusb_rt_dtor called\r\n");
 }
 
 static ERL_NIF_TERM get_handle(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
