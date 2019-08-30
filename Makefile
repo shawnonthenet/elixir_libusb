@@ -24,7 +24,7 @@ endif
 
 # BUILD_DIR := $(PWD)/_build
 
-PRIV_DIR := $(MIX_APP_PATH)/priv
+PRIV_DIR := priv
 LIBUSB_NIF := $(PRIV_DIR)/libusb_nif.so
 
 .PHONY: all clean dir-clean
