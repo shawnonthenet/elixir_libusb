@@ -101,8 +101,12 @@ static ERL_NIF_TERM list_devices(ErlNifEnv *env, int argc, const ERL_NIF_TERM ar
 
 static void libusb_rt_dtor(ErlNifEnv *env, void *obj)
 {
+    enif_fprintf(stderr, "libusb_rt_dtor called\r\n");
+
     ResourceData *resource_data = (ResourceData *)obj;
-    libusb_release_interface(resource_data->handle, 0);
+    if (resource_data->handle) {
+        libusb_release_interface(resource_data->handle, 0);
+    }
 }
 
 static ERL_NIF_TERM get_handle(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
@@ -209,6 +213,7 @@ static ERL_NIF_TERM release_handle(ErlNifEnv *env, int argc, const ERL_NIF_TERM 
 
     e = libusb_release_interface(resource_data->handle, 0);
     libusb_close(resource_data->handle);
+    resource_data->handle = 0;
     libusb_exit(NULL);
     return priv->atom_ok;
 }
