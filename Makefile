@@ -21,9 +21,7 @@ LDFLAGS += -undefined dynamic_lookup
 endif
 endif
 
-# BUILD_DIR := $(PWD)/_build
-
-PRIV_DIR := priv
+PRIV_DIR := $(MIX_APP_PATH)/priv
 LIBUSB_NIF := $(PRIV_DIR)/libusb_nif.so
 
 .PHONY: all clean dir-clean
