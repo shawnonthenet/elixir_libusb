@@ -43,7 +43,7 @@ NIF_CFLAGS := -O2
 NIF_LDFLAGS := -fPIC -shared -pedantic
 
 LIBUSB_DL := libusb-$(LIBUSB_VERSION).tar.bz2
-LIBUSB_DL_URL := "https://github.com/libusb/libusb/releases/download/v1.0.29/libusb-1.0.29.tar.bz2
+LIBUSB_DL_URL := "https://github.com/libusb/libusb/releases/download/v1.0.29/libusb-1.0.29.tar.bz2"
 
 .PHONY: all clean libusb-clean dir-clean
 
