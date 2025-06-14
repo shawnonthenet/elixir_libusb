@@ -27,7 +27,7 @@ LIBUSB_NIF := $(PRIV_DIR)/libusb_nif.so
 .PHONY: all clean dir-clean
 
 # MIX_BUILD_PATH := $(PWD)/_build
-LIBUSB_VERSION := 1.0.22
+LIBUSB_VERSION := 1.0.29
 LIBUSB_SRC_DIR := $(MIX_BUILD_PATH)/libusb-$(LIBUSB_VERSION)
 LIBUSB_BUILD_DIR := $(MIX_BUILD_PATH)/libusb
 LIBUSB_INCLUDE_DIR := $(LIBUSB_BUILD_DIR)/include
@@ -43,7 +43,7 @@ NIF_CFLAGS := -O2
 NIF_LDFLAGS := -fPIC -shared -pedantic
 
 LIBUSB_DL := libusb-$(LIBUSB_VERSION).tar.bz2
-LIBUSB_DL_URL := "https://iweb.dl.sourceforge.net/project/libusb/libusb-1.0/libusb-$(LIBUSB_VERSION)/$(LIBUSB_DL)"
+LIBUSB_DL_URL := "https://github.com/libusb/libusb/releases/download/v1.0.29/libusb-1.0.29.tar.bz2
 
 .PHONY: all clean libusb-clean dir-clean
 
